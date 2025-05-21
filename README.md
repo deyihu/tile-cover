@@ -8,7 +8,7 @@ Generate the minimum number of tiles to cover a [GeoJSON Geometry](http://geojso
 ### Install
 
 ```bash
-npm install @mapbox/tile-cover
+npm install tile-cover-deyihu
 ```
 
 ### Usage
@@ -17,8 +17,9 @@ npm install @mapbox/tile-cover
 var cover = require('@mapbox/tile-cover');
 var poly = JSON.parse(fs.readFileSync('./poly.geojson'));
 var limits = {
-  	min_zoom: 4,
-  	max_zoom: 9
+    min_zoom: 4,
+    max_zoom: 9,
+    tileSize: 256
 };
 
 cover.geojson(poly.geom, limits);
@@ -35,7 +36,8 @@ Given a [geometry](http://geojson.org/geojson-spec.html#geometry-objects), creat
 * `geom` (`Object`): GeoJSON geometry
 * `limits` (`Object`): an object with min_zoom and max_zoom properties specifying the minimum and maximum level to be tiled.
 
-**Returns** `Object`, FeatureCollection of cells formatted as GeoJSON Features
+**Returns** `Object` , FeatureCollection of cells formatted as GeoJSON Features
+
 ## tiles(geom, limits)
 
 Given a [geometry](http://geojson.org/geojson-spec.html#geometry-objects), create cells and return them in their raw form, as an array of cell identifiers.
@@ -43,7 +45,8 @@ Given a [geometry](http://geojson.org/geojson-spec.html#geometry-objects), creat
 * `geom` (`Object`): GeoJSON geometry
 * `limits` (`Object`): an object with min_zoom and max_zoom properties specifying the minimum and maximum level to be tiled.
 
-**Returns** `Array.<Array.<number>>`, An array of tiles given as [x, y, z] arrays
+**Returns** `Array.<Array.<number>>` , An array of tiles given as [x, y, z] arrays
+
 ## indexes(geom, limits)
 
 Given a [geometry](http://geojson.org/geojson-spec.html#geometry-objects), create cells and return them as quadkey indexes.
@@ -51,7 +54,7 @@ Given a [geometry](http://geojson.org/geojson-spec.html#geometry-objects), creat
 * `geom` (`Object`): GeoJSON geometry
 * `limits` (`Object`): an object with min_zoom and max_zoom properties specifying the minimum and maximum level to be tiled.
 
-**Returns** `Array.<String>`, An array of tiles given as quadkeys.
+**Returns** `Array.<String>` , An array of tiles given as quadkeys.
 
 ### Tests
 
