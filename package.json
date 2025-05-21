@@ -1,6 +1,6 @@
 {
   "name": "tile-cover-deyihu",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "generate the minimum number of tiles to cover a geojson geometry",
   "main": "index.js",
   "directories": {
