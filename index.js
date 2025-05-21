@@ -1,6 +1,6 @@
 'use strict';
 
-var tilebelt = require('@mapbox/tilebelt');
+var tilebelt = require('./tilebelt');
 
 /**
  * Given a geometry, create cells and return them in a format easily readable
@@ -13,16 +13,19 @@ var tilebelt = require('@mapbox/tilebelt');
  * @returns {Object} FeatureCollection of cells formatted as GeoJSON Features
  */
 exports.geojson = function (geom, limits) {
+    const tileSize = limits.tileSize || 256;
     return {
         type: 'FeatureCollection',
-        features: getTiles(geom, limits).map(tileToFeature)
+        features: getTiles(geom, limits).map(function (tile) {
+            return tileToFeature(tile, tileSize);
+        })
     };
 };
 
-function tileToFeature(t) {
+function tileToFeature(t, tileSize) {
     return {
         type: 'Feature',
-        geometry: tilebelt.tileToGeoJSON(t),
+        geometry: tilebelt.tileToGeoJSON(t, tileSize),
         properties: {}
     };
 }
@@ -59,28 +62,29 @@ function getTiles(geom, limits) {
         maxZoom = limits.max_zoom,
         tileHash = {},
         tiles = [];
+    const tileSize = limits.tileSize || 256;
 
     if (geom.type === 'Point') {
-        return [tilebelt.pointToTile(coords[0], coords[1], maxZoom)];
+        return [tilebelt.pointToTile(coords[0], coords[1], maxZoom, tileSize)];
 
     } else if (geom.type === 'MultiPoint') {
         for (i = 0; i < coords.length; i++) {
-            tile = tilebelt.pointToTile(coords[i][0], coords[i][1], maxZoom);
+            tile = tilebelt.pointToTile(coords[i][0], coords[i][1], maxZoom, tileSize);
             tileHash[toID(tile[0], tile[1], tile[2])] = true;
         }
     } else if (geom.type === 'LineString') {
-        lineCover(tileHash, coords, maxZoom);
+        lineCover(tileHash, coords, maxZoom, tileSize);
 
     } else if (geom.type === 'MultiLineString') {
         for (i = 0; i < coords.length; i++) {
-            lineCover(tileHash, coords[i], maxZoom);
+            lineCover(tileHash, coords[i], maxZoom, tileSize);
         }
     } else if (geom.type === 'Polygon') {
-        polygonCover(tileHash, tiles, coords, maxZoom);
+        polygonCover(tileHash, tiles, coords, maxZoom, tileSize);
 
     } else if (geom.type === 'MultiPolygon') {
         for (i = 0; i < coords.length; i++) {
-            polygonCover(tileHash, tiles, coords[i], maxZoom);
+            polygonCover(tileHash, tiles, coords[i], maxZoom, tileSize);
         }
     } else {
         throw new Error('Geometry type not implemented');
@@ -146,12 +150,12 @@ function mergeTiles(tileHash, tiles, limits) {
     return mergedTiles;
 }
 
-function polygonCover(tileHash, tileArray, geom, zoom) {
+function polygonCover(tileHash, tileArray, geom, zoom, tileSize) {
     var intersections = [];
 
     for (var i = 0; i < geom.length; i++) {
         var ring = [];
-        lineCover(tileHash, geom[i], zoom, ring);
+        lineCover(tileHash, geom[i], zoom, ring, tileSize);
 
         for (var j = 0, len = ring.length, k = len - 1; j < len; k = j++) {
             var m = (j + 1) % len;
@@ -182,12 +186,12 @@ function compareTiles(a, b) {
     return (a[1] - b[1]) || (a[0] - b[0]);
 }
 
-function lineCover(tileHash, coords, maxZoom, ring) {
+function lineCover(tileHash, coords, maxZoom, ring, tileSize) {
     var prevX, prevY;
 
     for (var i = 0; i < coords.length - 1; i++) {
-        var start = tilebelt.pointToTileFraction(coords[i][0], coords[i][1], maxZoom),
-            stop = tilebelt.pointToTileFraction(coords[i + 1][0], coords[i + 1][1], maxZoom),
+        var start = tilebelt.pointToTileFraction(coords[i][0], coords[i][1], maxZoom, tileSize),
+            stop = tilebelt.pointToTileFraction(coords[i + 1][0], coords[i + 1][1], maxZoom, tileSize),
             x0 = start[0],
             y0 = start[1],
             x1 = stop[0],
