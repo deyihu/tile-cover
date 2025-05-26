@@ -14,7 +14,7 @@ npm install tile-cover-deyihu
 ### Usage
 
 ```js
-var cover = require('@mapbox/tile-cover');
+var cover = require('tile-cover-deyihu');
 var poly = JSON.parse(fs.readFileSync('./poly.geojson'));
 var limits = {
     min_zoom: 4,
